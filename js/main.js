@@ -1,8 +1,7 @@
 //begin script when window loads
 window.onload = setMap();
 
-function setMap(){
-    
+function setMap(){    
      var width = 960,
         height = 460;
 
@@ -12,14 +11,22 @@ function setMap(){
         .attr("class", "map")
         .attr("width", width)
         .attr("height", height);
-
-    //create Albers equal area conic projection centered on France
+/*
     var projection = d3.geo.albers()
-        .center([0, 46.2])
-        .rotate([-2, 0, 0])
-        .parallels([43, 62])
-        .scale(2500)
+        .center([0, 46.33])
+        .rotate([106.45, -0.91, 0])
+        .parallels([40.18, 54.69])
+        .scale(503.03)
+        .translate([(width / 2, height) / 2]);
+    */
+    
+    
+    var projection = d3.geo.albersUsa()
+        .scale(1000)
         .translate([width / 2, height / 2]);
+    
+    var path = d3.geo.path()
+        .projection(projection);
     
     //use queue.js to parallelize asynchronous data loading
     d3_queue.queue()
@@ -34,9 +41,39 @@ function setMap(){
  
         
         //translate europe TopoJSON
-        var USfeatures= topojson.feature(US , US.objects.UnitedStates).features;
+        var USfeatures= topojson.feature(US, US.objects.UnitedStates).features;
        
         console.log(USfeatures);
+    
+        var states = map.selectAll(".states")
+            .data(USfeatures) 
+            .enter()
+            .append("path")
+            .attr("class", function(d){
+                console.log(d);
+                return "states " + d.properties.State;
+            })
+            .attr("d", path);
+        
+        
+        
+        /*
+         var countries = map.append("path")
+            .datum(europeCountries)
+            .attr("class", "countries")
+            .attr("d", path);
+
+        //add France regions to map
+        var regions = map.selectAll(".regions")
+            .data(franceRegions)
+            .enter()
+            .append("path")
+            .attr("class", function(d){
+                return "regions " + d.properties.adm1_code;
+            })
+            .attr("d", path);
+        */
+        
         
     };
 };
