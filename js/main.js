@@ -25,12 +25,12 @@ function setMap(){
     //note- I will be using UnitedStates.topojson , and the April5 version is a backup, but otherwise not used. 
     d3_queue.queue()
         .defer(d3.csv, "data/UnitedStates.csv") //load attributes from csv
-        .defer(d3.json, "data/UnitedStates.topojson") //initial spatial data w/ attributes in topojson
+        .defer(d3.json, "data/UnitedStatesFinal.topojson") //initial spatial data w/ attributes in topojson
         .defer(d3.json, "data/UnitedStatesApril5.topojson") //backup spatialdata
         .await(callback);
 
     function callback(error, csvData, US, US45){
-
+        console.log(US45);
         //translate europe TopoJSON
         var USfeatures= topojson.feature(US, US.objects.UnitedStates).features;
         console.log(USfeatures);
