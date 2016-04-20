@@ -4,7 +4,7 @@
     var attrArray = ["LNG", "HY", "ELEC", "E85", "CNG", "BD", "LPG", "total"];
     
     //initial attribute
-    var expressed = attrArray[1]; 
+    var expressed = attrArray[7]; 
     
 //begin script when window loads
 window.onload = setMap();
@@ -47,12 +47,12 @@ function setMap(){
         USfeatures = joinData(USfeatures, csvData);
         
         //color scale
-        var colorScale = makeColorScale(csvData);
+        colorScale = makeColorScale(csvData);
         
         //add enumeration units to the map
-        setEnumerationUnits(USfeatures, map, path);
+        setEnumerationUnits(USfeatures, map, path, colorScale);
     };
-};  
+    };  
     //creates color scale based on breaks
     function makeColorScale(data){
         var colorClasses = [
@@ -62,19 +62,21 @@ function setMap(){
             "#31a354",
             "#006837"
         ];
-        console.log(colorClasses);
-        var colorScale = d3.scale.quantile()
-            .range(colorClasses);
-        //build array of all values of the expressed attribute
-        var domainArray = [];
-        for (var i=0; i<data.length; i++){
-            var val = parseFloat(data[i][expressed]);
-            domainArray.push(val);
-        };
-         //assign array of expressed values as scale domain
-        colorScale.domain(domainArray);
+   //create color scale generator
+    var colorScale = d3.scale.quantile()
+        .range(colorClasses);
 
-        return colorScale;
+    //build array of all values of the expressed attribute
+    var domainArray = [];
+    for (var i=0; i<data.length; i++){
+        var val = parseFloat(data[i][expressed]);
+        domainArray.push(val);
+    };
+
+    //assign array of expressed values as scale domain
+    colorScale.domain(domainArray);
+
+    return colorScale;
     };
     
     //joins spatial data with csv
@@ -103,7 +105,7 @@ function setMap(){
     };
     
     //draws polygons with with csv data combined
-    function setEnumerationUnits(USfeatures, map, path){
+    function setEnumerationUnits(USfeatures, map, path, colorScale){
         var states = map.selectAll(".states") 
             .data(USfeatures) 
             .enter()
@@ -112,6 +114,9 @@ function setMap(){
                 console.log(d);
                 return "states " + d.properties.State;
             })
-            .attr("d", path); 
+            .attr("d", path)
+            .style("fill", function(d){
+            return colorScale(d.properties[expressed]);
+        });
     };
 })();
