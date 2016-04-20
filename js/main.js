@@ -12,7 +12,7 @@ window.onload = setMap();
 function setMap(){    
        //map frame dimensions
     var width = window.innerWidth * 0.5,
-        height = 460;
+        height = 400;
     //svg map container created
     var map = d3.select("body")
         .append("svg")
@@ -141,7 +141,7 @@ function choropleth(props, colorScale){
 };
     function setInfo(){
          var infoWidth = window.innerWidth* 0.425,
-        infoHeight = 460;
+        infoHeight = 400;
         var infoBox = d3.select("body")
         .append("svg")
         .attr("width", infoWidth)
@@ -169,6 +169,12 @@ function choropleth(props, colorScale){
         .data(csvData)
         .enter()
         .append("rect")
+          .sort(function(a, b){
+            return a[expressed]-b[expressed]
+        })
+        .attr("class", function(d){
+            return "bars " + d.adm1_code;
+        })
         .attr("class", function(d){
             return "bars " + d.State;
         })
@@ -177,13 +183,37 @@ function choropleth(props, colorScale){
             return i * (chartWidth / csvData.length);
         })
         .attr("height", function(d){
-            return yScale(parseFloat(d[expressed])*5); //5 added for visual aid
+            return yScale(parseFloat(d[expressed])*7); //5 added for visual aid
         })
         .attr("y", function(d){
-            return chartHeight - (yScale(parseFloat(d[expressed]))*5); //mulitipled by 5 for visual aid
+            return chartHeight - (yScale(parseFloat(d[expressed]))*7); //mulitipled by 5 for visual aid
         })
         .style("fill", function(d){
             return choropleth(d, colorScale);
         });
+        
+        //TODO- ONLY Show if cursor is placed over it! //otherwise remove
+    var numbers = chart.selectAll(".numbers")
+        .data(csvData)
+        .enter()
+        .append("text")
+        .sort(function(a, b){
+            return a[expressed]-b[expressed]
+        })
+        .attr("class", function(d){
+            return "numbers " + d.adm1_code;
+        })
+        .attr("text-anchor", "middle")
+        .attr("x", function(d, i){
+            var fraction = chartWidth / csvData.length;
+            return i * fraction + (fraction - 1) / 2;
+        })
+        .attr("y", function(d){
+            return chartHeight-27; //shifted numbers to bottom of bar charts
+        })
+        .text(function(d){
+            return d[expressed];
+        });
+
     };
 })();
