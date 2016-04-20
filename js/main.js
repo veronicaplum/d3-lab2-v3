@@ -37,7 +37,7 @@ function setMap(){
         var USfeatures= topojson.feature(US, US.objects.UnitedStates).features;
         console.log(USfeatures);
     
-        var attrArray = ["var1", "var2", "var3", "var4", "var5", "var6","var7", "var8"];
+        var attrArray = ["LNG", "HY", "ELEC", "E85", "CNG", "BD","LPG", "total"];
         
         for (var i=0; i<csvData.length; i++){
             var csvState = csvData[i]; //the current state
