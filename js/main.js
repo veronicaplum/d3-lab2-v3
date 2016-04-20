@@ -4,7 +4,7 @@
     var attrArray = ["LNG", "HY", "ELEC", "E85", "CNG", "BD", "LPG", "total"];
     
     //initial attribute
-    var expressed = attrArray[7]; 
+    var expressed = attrArray[2]; 
     
 //begin script when window loads
 window.onload = setMap();
@@ -62,17 +62,19 @@ function setMap(){
             "#31a354",
             "#006837"
         ];
-  //create color scale generator
+   //create color scale generator
     var colorScale = d3.scale.quantile()
         .range(colorClasses);
 
-    //build two-value array of minimum and maximum expressed attribute values
-    var minmax = [
-        d3.min(data, function(d) { return parseFloat(d[expressed]); }),
-        d3.max(data, function(d) { return parseFloat(d[expressed]); })
-    ];
-    //assign two-value array as scale domain
-    colorScale.domain(minmax);
+    //build array of all values of the expressed attribute
+    var domainArray = [];
+    for (var i=0; i<data.length; i++){
+        var val = parseFloat(data[i][expressed]);
+        domainArray.push(val);
+    };
+
+    //assign array of expressed values as scale domain
+    colorScale.domain(domainArray);
 
     return colorScale;
     };
