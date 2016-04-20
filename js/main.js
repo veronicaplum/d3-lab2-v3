@@ -1,3 +1,11 @@
+(function(){
+
+    //array of attributes
+    var attrArray = ["LNG", "HY", "ELEC", "E85", "CNG", "BD", "LPG", "total"];
+    
+    //initial attribute
+    var expressed = attrArray[1]; 
+    
 //begin script when window loads
 window.onload = setMap();
 
@@ -26,19 +34,51 @@ function setMap(){
     d3_queue.queue()
         .defer(d3.csv, "data/UnitedStatesFin.csv") //load attributes from csv
         .defer(d3.json, "data/UnitedStatesFinal.topojson") //initial spatial data w/ attributes in topojson
-        .defer(d3.json, "data/UnitedStatesApril5.topojson") //backup spatialdata
         .await(callback);
 
-    function callback(error, csvData, US, US45){
+    function callback(error, csvData, US){
         console.log(csvData);
-        console.log(US45);
         
         //translate europe TopoJSON
         var USfeatures= topojson.feature(US, US.objects.UnitedStates).features;
         console.log(USfeatures);
-    
-        var attrArray = ["LNG", "HY", "ELEC", "E85", "CNG", "BD","LPG", "total"];
+
+        //join csv data to GeoJSON enumeration units
+        USfeatures = joinData(USfeatures, csvData);
         
+        //color scale
+        var colorScale = makeColorScale(csvData);
+        
+        //add enumeration units to the map
+        setEnumerationUnits(USfeatures, map, path);
+    };
+};  
+    //creates color scale based on breaks
+    function makeColorScale(data){
+        var colorClasses = [
+            "#ffffcc",
+            "#c3e699",
+            "#78c679",
+            "#31a354",
+            "#006837"
+        ];
+        console.log(colorClasses);
+        var colorScale = d3.scale.quantile()
+            .range(colorClasses);
+        //build array of all values of the expressed attribute
+        var domainArray = [];
+        for (var i=0; i<data.length; i++){
+            var val = parseFloat(data[i][expressed]);
+            domainArray.push(val);
+        };
+         //assign array of expressed values as scale domain
+        colorScale.domain(domainArray);
+
+        return colorScale;
+    };
+    
+    //joins spatial data with csv
+    function joinData(USfeatures, csvData){
         for (var i=0; i<csvData.length; i++){
             var csvState = csvData[i]; //the current state
             var csvKey = csvState.State; //the CSV primary key
@@ -56,15 +96,14 @@ function setMap(){
                         var val = parseFloat(csvState[attr]); //get csv attribute value
                         geojsonProps[attr] = val; //assign attribute and value to geojson properties
                     });
+                };
             };
         };
+        return USfeatures;
     };
-
-            
-            //for each variable in the current state
-                
-        
-        //creates class names for each state indiividually(located at USfeatures.properties.State) and draws them to the map svg
+    
+    //draws polygons with with csv data combined
+    function setEnumerationUnits(USfeatures, map, path){
         var states = map.selectAll(".states") 
             .data(USfeatures) 
             .enter()
@@ -73,6 +112,6 @@ function setMap(){
                 console.log(d);
                 return "states " + d.properties.State;
             })
-            .attr("d", path); //"d" is the class name created for each state from the statement d.properties.State and added in to the "states" class. Now each there are 51 states attributes, each continang there own class titled by their state initials.
+            .attr("d", path); 
     };
-};
+})();
