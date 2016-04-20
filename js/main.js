@@ -47,7 +47,7 @@ function setMap(){
         USfeatures = joinData(USfeatures, csvData);
         
         //color scale
-        colorScale = makeColorScale(csvData);
+        colorScale = makeColorScale(csvData); //can't have var infront of it! It is not a vairable!
         
         //add enumeration units to the map
         setEnumerationUnits(USfeatures, map, path, colorScale);
@@ -62,23 +62,32 @@ function setMap(){
             "#31a354",
             "#006837"
         ];
-   //create color scale generator
+  //create color scale generator
     var colorScale = d3.scale.quantile()
         .range(colorClasses);
 
-    //build array of all values of the expressed attribute
-    var domainArray = [];
-    for (var i=0; i<data.length; i++){
-        var val = parseFloat(data[i][expressed]);
-        domainArray.push(val);
-    };
-
-    //assign array of expressed values as scale domain
-    colorScale.domain(domainArray);
+    //build two-value array of minimum and maximum expressed attribute values
+    var minmax = [
+        d3.min(data, function(d) { return parseFloat(d[expressed]); }),
+        d3.max(data, function(d) { return parseFloat(d[expressed]); })
+    ];
+    //assign two-value array as scale domain
+    colorScale.domain(minmax);
 
     return colorScale;
     };
-    
+    //function to test for data value and return color
+    function choropleth(props, colorScale){
+        //make sure attribute value is a number
+        var val = parseFloat(props[expressed]);
+        //if attribute value exists, assign a color; otherwise assign gray
+        if (val && val != NaN){
+            return colorScale(val);
+        } else {
+            return "#CCC";
+        };
+    };
+
     //joins spatial data with csv
     function joinData(USfeatures, csvData){
         for (var i=0; i<csvData.length; i++){
@@ -116,7 +125,8 @@ function setMap(){
             })
             .attr("d", path)
             .style("fill", function(d){
-            return colorScale(d.properties[expressed]);
+            return choropleth(d.properties, colorScale);
         });
+
     };
 })();
