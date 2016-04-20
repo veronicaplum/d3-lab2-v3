@@ -78,17 +78,7 @@ function setMap(){
 
     return colorScale;
     };
-    //function to test for data value and return color
-    function choropleth(props, colorScale){
-        //make sure attribute value is a number
-        var val = parseFloat(props[expressed]);
-        //if attribute value exists, assign a color; otherwise assign gray
-        if (val && val != NaN){
-            return colorScale(val);
-        } else {
-            return "#CCC";
-        };
-    };
+ 
 
     //joins spatial data with csv
     function joinData(USfeatures, csvData){
@@ -127,8 +117,22 @@ function setMap(){
             })
             .attr("d", path)
             .style("fill", function(d){
-            return choropleth(d.properties, colorScale);
+            return colorScale(d.properties[expressed]);
         });
 
+    };
+    
+    //function to create coordinated bar chart
+    function setChart(csvData, colorScale){
+        //chart frame dimensions
+        var chartWidth = 550,
+            chartHeight = 460;
+
+        //create a second svg element to hold the bar chart
+        var chart = d3.select("body")
+            .append("svg")
+            .attr("width", chartWidth)
+            .attr("height", chartHeight)
+             .attr("class", "chart");
     };
 })();
