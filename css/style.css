@@ -18,6 +18,9 @@
     font-size: 1.5em;
     font-weight: bold;
 }*/
+html{
+    background-color:lightgoldenrodyellow;
+}
 .states {
     stroke: #CCC;
     stroke-width: 0.5px;
@@ -26,6 +29,7 @@
 .map {
     border: medium solid #999;
     margin: 10px 0 0 20px;
+    background-color: lightgray;
 }
 
 .chart {
@@ -33,4 +37,8 @@
     border: medium solid #999;
     float: right;
     margin: 10px 20px 0 0;
+}
+
+.infoBox {
+    background-color: darkseagreen;
 }

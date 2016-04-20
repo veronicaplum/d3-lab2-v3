@@ -4,7 +4,7 @@
     var attrArray = ["LNG", "HY", "ELEC", "E85", "CNG", "BD", "LPG", "total"];
     
     //initial attribute
-    var expressed = attrArray[2]; 
+    var expressed = attrArray[7]; 
     
 //begin script when window loads
 window.onload = setMap();
@@ -52,9 +52,12 @@ function setMap(){
         //add enumeration units to the map
         setEnumerationUnits(USfeatures, map, path, colorScale);
         
+        //add info box
+        setInfo();
+        
         //add coordinated visualization to the map
         setChart(csvData, colorScale);
-
+        
     };
     };  
     //creates color scale based on breaks
@@ -121,22 +124,66 @@ function setMap(){
             })
             .attr("d", path)
             .style("fill", function(d){
-            return colorScale(d.properties[expressed]);
+            return choropleth(d.properties, colorScale);
         });
 
     };
-    
+    //function to test for data value and return color
+function choropleth(props, colorScale){
+    //make sure attribute value is a number
+    var val = parseFloat(props[expressed]);
+    //if attribute value exists, assign a color; otherwise assign gray
+    if (val && val != NaN){
+        return colorScale(val);
+    } else {
+        return "#CCC";
+    };
+};
+    function setInfo(){
+         var infoWidth = window.innerWidth* 0.425,
+        infoHeight = 460;
+        var infoBox = d3.select("body")
+        .append("svg")
+        .attr("width", infoWidth)
+        .attr("height", infoHeight)
+        .attr("class", "infoBox");
+        
+    }
     //function to create coordinated bar chart
     function setChart(csvData, colorScale){
         //chart frame dimensions
-         var chartWidth = window.innerWidth * 0.425,
-        chartHeight = 460;
+         var chartWidth = window.innerWidth,
+        chartHeight = 150;
 
-        //create a second svg element to hold the bar chart
-        var chart = d3.select("body")
-            .append("svg")
-            .attr("width", chartWidth)
-            .attr("height", chartHeight)
-             .attr("class", "chart");
+            //Example 2.1 line 17...create a second svg element to hold the bar chart
+    var chart = d3.select("body")
+        .append("svg")
+        .attr("width", chartWidth)
+        .attr("height", chartHeight)
+        .attr("class", "chart");
+    var yScale = d3.scale.linear()
+        .range([0, chartHeight])
+        .domain([0, 105]);
+
+    var bars = chart.selectAll(".bars")
+        .data(csvData)
+        .enter()
+        .append("rect")
+        .attr("class", function(d){
+            return "bars " + d.State;
+        })
+        .attr("width", chartWidth / csvData.length - 1)
+        .attr("x", function(d, i){
+            return i * (chartWidth / csvData.length);
+        })
+        .attr("height", function(d){
+            return yScale(parseFloat(d[expressed])*5); //5 added for visual aid
+        })
+        .attr("y", function(d){
+            return chartHeight - (yScale(parseFloat(d[expressed]))*5); //mulitipled by 5 for visual aid
+        })
+        .style("fill", function(d){
+            return choropleth(d, colorScale);
+        });
     };
 })();
