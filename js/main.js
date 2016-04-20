@@ -10,9 +10,9 @@
 window.onload = setMap();
 
 function setMap(){    
-     var width = 960,
+       //map frame dimensions
+    var width = window.innerWidth * 0.5,
         height = 460;
-
     //svg map container created
     var map = d3.select("body")
         .append("svg")
@@ -22,7 +22,7 @@ function setMap(){
 
     //USA Albers projection
     var projection = d3.geo.albersUsa()
-        .scale(1000)
+        .scale(860)
         .translate([width / 2, height / 2]);
     
     //path is the projection
@@ -51,6 +51,10 @@ function setMap(){
         
         //add enumeration units to the map
         setEnumerationUnits(USfeatures, map, path, colorScale);
+        
+        //add coordinated visualization to the map
+        setChart(csvData, colorScale);
+
     };
     };  
     //creates color scale based on breaks
@@ -125,8 +129,8 @@ function setMap(){
     //function to create coordinated bar chart
     function setChart(csvData, colorScale){
         //chart frame dimensions
-        var chartWidth = 550,
-            chartHeight = 460;
+         var chartWidth = window.innerWidth * 0.425,
+        chartHeight = 460;
 
         //create a second svg element to hold the bar chart
         var chart = d3.select("body")
