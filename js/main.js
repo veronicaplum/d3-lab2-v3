@@ -4,7 +4,7 @@
     var attrArray = ["LNG", "HY", "ELEC", "E85", "CNG", "BD", "LPG", "total"];
     
     //initial attribute
-    var expressed = attrArray[3]; 
+    var expressed = attrArray[0]; 
     
 //begin script when window loads
 window.onload = setMap();
@@ -58,17 +58,19 @@ function setMap(){
         //add coordinated visualization to the map
         setChart(csvData, colorScale);
         
-        createDropdown();
-        
+        createDropdown(csvData);
     };
     }; 
     
          //function to create a dropdown menu for attribute selection
-function createDropdown(){
+function createDropdown(csvData){
     //add select element
     var dropdown = d3.select("body")
         .append("select")
-        .attr("class", "dropdown");
+        .attr("class", "dropdown")
+        .on("change", function(){
+            changeAttribute(this.value, csvData)
+        });
 
     //add initial option
     var titleOption = dropdown.append("option")
@@ -84,6 +86,24 @@ function createDropdown(){
         .attr("value", function(d){ return d })
         .text(function(d){ return d });
 };
+    
+    //dropdown change listener handler
+function changeAttribute(attribute, csvData){
+    //change the expressed attribute
+    expressed = attribute;
+
+    //recreate the color scale
+    var colorScale = makeColorScale(csvData);
+
+    //recolor enumeration units
+    var states = d3.selectAll(".states")
+        .style("fill", function(d){
+            return choropleth(d.properties, colorScale);
+    });
+    
+    
+};
+
     //creates color scale based on breaks
     function makeColorScale(data){
         var colorClasses = [
@@ -160,7 +180,7 @@ function choropleth(props, colorScale){
     if (val && val != NaN){
         return colorScale(val);
     } else {
-        return "#CCC";
+        return "#fff";
     };
 };
     function setInfo(){
@@ -187,8 +207,7 @@ function choropleth(props, colorScale){
         .attr("class", "chart");
     var yScale = d3.scale.linear()
         .range([0, chartHeight])
-        .domain([0, 80]);
-        
+        .domain([0, 15]);//got rid of *7 *5 instances where yScale was used... instead I reduced the "y" of the domain from 150 to 15
         
 
     var bars = chart.selectAll(".bars")
@@ -207,10 +226,10 @@ function choropleth(props, colorScale){
             return i * (chartWidth / csvData.length);
         })
         .attr("height", function(d){
-            return yScale(parseFloat(d[expressed])*7); //5 added for visual aid
+            return yScale(parseFloat(d[expressed])); 
         })
         .attr("y", function(d){
-            return chartHeight - (yScale(parseFloat(d[expressed]))*7); //mulitipled by 5 for visual aid
+            return chartHeight - (yScale(parseFloat(d[expressed]))); 
         })
         .style("fill", function(d){
             return choropleth(d, colorScale);
@@ -219,7 +238,7 @@ function choropleth(props, colorScale){
         //if 0, don't show
         //if NaN, say none (verticle)
         //TODO- ONLY Show if cursor is placed over it! //otherwise remove
-    var numbers = chart.selectAll(".numbers")
+    var numbers = chart.selectAll(".numbers") 
         .data(csvData)
         .enter()
         .append("text")
@@ -235,10 +254,10 @@ function choropleth(props, colorScale){
             return i * fraction + (fraction - 1) / 2;
         })
         .attr("y", function(d){
-            return chartHeight - (yScale(parseFloat(d[expressed]))*7); //shifted numbers to bottom of bar charts
+            return chartHeight - (yScale(parseFloat(d[expressed]))); //shifted numbers to bottom of bar charts
         })
         .text(function(d){
-            return d3.round(d[expressed]-5)+5; //move state underneith eventually (make a new var, and from there do +25 to put it above the graph)
+            return d3.round(d[expressed]); //move state underneith eventually (make a new var, and from there do +25 to put it above the graph)
         });
         
     var stateInt = chart.selectAll(".stateInt")
@@ -271,20 +290,5 @@ function choropleth(props, colorScale){
         .text("Number of Stations offering Fuel Alternative: " + expressed + " for every 100,000 persons in each State");
     };
     
-    var yAxis = d3.svg.axis()
-        .scale(yScale)
-        .orient("left");
-
-    //place axis
-    var axis = chart.append("g")
-        .attr("class", "axis")
-        .attr("transform", translate)
-        .call(yAxis);
-
-    //create frame for chart border
-    var chartFrame = chart.append("rect")
-        .attr("class", "chartFrame")
-        .attr("width", chartInnerWidth)
-        .attr("height", chartInnerHeight)
-        .attr("transform", translate);
+ 
 })();
