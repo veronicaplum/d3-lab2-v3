@@ -22,7 +22,8 @@ content{
 .chart {
     background-color: rgba(128,128,128,.2);
     border: medium solid #999;
-    margin: 10px 0 0 20px ;
+    margin: 15px 0 0 20px ;
+    float: middle;
 }
 .numbers {
     fill: #000;
@@ -32,11 +33,9 @@ content{
 
 .infoBox {
     background-color: darkseagreen;
+    border: medium solid #999;
 }
-.chart {
-    float: right;
-    margin: 7px 20px 0 0;
-}
+
 
 .chartTitle {
     font-family: sans-serif;

@@ -4,7 +4,22 @@
     var attrArray = ["LNG", "HY", "ELEC", "E85", "CNG", "BD", "LPG", "total"];
     
     //initial attribute
-    var expressed = attrArray[0]; 
+    var expressed = attrArray[7]; 
+    
+    //chart frame dimensions
+         var chartWidth = window.innerWidth*0.9,
+             chartHeight = 150,
+             leftPadding = 0,
+             rightPadding = 0,
+             topBottomPadding = 0,
+             chartInnerWidth = chartWidth - leftPadding - rightPadding,
+             chartInnerHeight = chartHeight - topBottomPadding * 2,
+             translate = "translate(" + leftPadding + "," + topBottomPadding + ")";
+    
+       var yScale = d3.scale.linear()
+        .range([10, chartHeight]) //the 10 is there for the stateInt buffer 
+        .domain([0, 15]);
+
     
 //begin script when window loads
 window.onload = setMap();
@@ -62,6 +77,42 @@ function setMap(){
     };
     }; 
     
+//function to position, size, and color bars in chart
+function updateChart(bars, stateInt, n, colorScale){
+    //position bars
+    
+    bars.attr("x", function(d, i){
+            return i * (chartInnerWidth / n) + leftPadding;
+        })
+        //size/resize bars
+        .attr("height", function(d, i){
+            return 150 - yScale(parseFloat(d[expressed]));
+        })
+        .attr("y", function(d, i){
+            return 150 - yScale(parseFloat(d[expressed])) + topBottomPadding;
+        })
+        //color/recolor bars
+        .style("fill", function(d){
+            return choropleth(d, colorScale);
+        });
+    
+   
+        stateInt.attr("text-anchor", "middle")
+        .attr("x", function(d, i){
+            var fraction = chartWidth / n;
+            return i * fraction + (fraction - 1) / 2;
+        })
+        .attr("y", function(d){
+            return chartHeight -3; //shifted numbers to bottom of bar charts
+        })
+        .text(function(d){
+            return d.State; //move state underneith eventually (make a new var, and from there do +25 to put it above the graph)
+        });
+        
+    
+    
+};
+    
          //function to create a dropdown menu for attribute selection
 function createDropdown(csvData){
     //add select element
@@ -100,6 +151,20 @@ function changeAttribute(attribute, csvData){
         .style("fill", function(d){
             return choropleth(d.properties, colorScale);
     });
+    
+     var bars = d3.selectAll(".bars")
+        //re-sort bars
+        .sort(function(a, b){
+            console.log("hell no");
+            return b[expressed] - a[expressed];
+        });
+    var stateInt = d3.selectAll(".stateInt")
+        .text(function(d){
+            return d.State; //move state underneith eventually (make a new var, and from there do +25 to put it above the graph)
+        });
+        
+
+    updateChart(bars, csvData.length, colorScale);
     
     
 };
@@ -191,13 +256,19 @@ function choropleth(props, colorScale){
         .attr("width", infoWidth)
         .attr("height", infoHeight)
         .attr("class", "infoBox");
-        
     }
     //function to create coordinated bar chart
     function setChart(csvData, colorScale){
         //chart frame dimensions
          var chartWidth = window.innerWidth*0.9,
-        chartHeight = 150;
+             chartHeight = 150,
+             leftPadding = 0,
+             rightPadding = 0,
+             topBottomPadding = 0,
+             chartInnerWidth = chartWidth - leftPadding - rightPadding,
+             chartInnerHeight = chartHeight - topBottomPadding * 2,
+             translate = "translate(" + leftPadding + "," + topBottomPadding + ")";
+
 
             //Example 2.1 line 17...create a second svg element to hold the bar chart
     var chart = d3.select("body")
@@ -205,8 +276,15 @@ function choropleth(props, colorScale){
         .attr("width", chartWidth)
         .attr("height", chartHeight)
         .attr("class", "chart");
+    
+    var chartBackground = chart.append("rect")
+        .attr("class", "chartBackground")
+        .attr("width", chartInnerWidth)
+        .attr("height", chartInnerHeight)
+        .attr("transform", translate);
+        
     var yScale = d3.scale.linear()
-        .range([0, chartHeight])
+        .range([10, chartHeight]) //the 10 is there for the stateInt buffer 
         .domain([0, 15]);//got rid of *7 *5 instances where yScale was used... instead I reduced the "y" of the domain from 150 to 15
         
 
@@ -215,35 +293,37 @@ function choropleth(props, colorScale){
         .enter()
         .append("rect")
           .sort(function(a, b){
-            return a[expressed]-b[expressed]
+            return b[expressed]-a[expressed]
         })
-      
         .attr("class", function(d){
             return "bars " + d.State;
         })
-        .attr("width", chartWidth / csvData.length - 1)
+        .attr("width", chartInnerWidth / csvData.length - 1)
         .attr("x", function(d, i){
-            return i * (chartWidth / csvData.length);
+            return i * (chartInnerWidth / csvData.length)+leftPadding;
         })
         .attr("height", function(d){
-            return yScale(parseFloat(d[expressed])); 
+            return 150-yScale(parseFloat(d[expressed])); 
         })
         .attr("y", function(d){
-            return chartHeight - (yScale(parseFloat(d[expressed]))); 
+            return 150-yScale(parseFloat(d[expressed]))+ topBottomPadding; 
         })
         .style("fill", function(d){
             return choropleth(d, colorScale);
         });
         
+        
         //if 0, don't show
         //if NaN, say none (verticle)
         //TODO- ONLY Show if cursor is placed over it! //otherwise remove
+        //get rid of numbers you don't nee dhtem
+        /*
     var numbers = chart.selectAll(".numbers") 
         .data(csvData)
         .enter()
         .append("text")
         .sort(function(a, b){
-            return a[expressed]-b[expressed]
+            return b[expressed]-a[expressed]
         })
         .attr("class", function(d){
             return "numbers " + d.State;
@@ -259,13 +339,14 @@ function choropleth(props, colorScale){
         .text(function(d){
             return d3.round(d[expressed]); //move state underneith eventually (make a new var, and from there do +25 to put it above the graph)
         });
+        */
         
     var stateInt = chart.selectAll(".stateInt")
         .data(csvData)
         .enter()
         .append("text")
         .sort(function(a, b){
-            return a[expressed]-b[expressed]
+            return b[expressed]-a[expressed]
         })
         .attr("class", function(d){
             return "numbers " + d.State;
@@ -276,7 +357,7 @@ function choropleth(props, colorScale){
             return i * fraction + (fraction - 1) / 2;
         })
         .attr("y", function(d){
-            return chartHeight; //shifted numbers to bottom of bar charts
+            return chartHeight -3; //shifted numbers to bottom of bar charts
         })
         .text(function(d){
             return d.State; //move state underneith eventually (make a new var, and from there do +25 to put it above the graph)
@@ -288,7 +369,26 @@ function choropleth(props, colorScale){
         .attr("y", 20)
         .attr("class", "chartTitle")
         .text("Number of Stations offering Fuel Alternative: " + expressed + " for every 100,000 persons in each State");
+    
+         //place axis
+    var axis = chart.append("g")
+        .attr("class", "axis")
+        .attr("transform", translate)
+        .call(yScale);
+    
+    
+    //create frame for chart border
+    var chartFrame = chart.append("rect")
+        .attr("class", "chartFrame")
+        .attr("width", chartInnerWidth)
+        .attr("height", chartInnerHeight)
+        .attr("transform", translate);
+        
+         //set bar positions, heights, and colors
+    updateChart(bars, stateInt, csvData.length, colorScale);
+    
     };
     
+
  
 })();
