@@ -1,9 +1,9 @@
 /* 575 boilerplate style.css */
 html{
-    background-color:lightgoldenrodyellow;
+    background-color:lightyellow;
 }
 
-content{
+.div{
     font-family: 'Franklin Gothic Medium', 'Franklin Gothic', 'ITC Franklin Gothic', Arial, sans-serif;
     font-size: 2em;
 }
@@ -79,7 +79,7 @@ content{
     border: 1px solid #999;
     box-shadow: 2px 2px 4px #999;
     margin-left: 400px;
-    margin-top: 20px;
+    margin-top: 90px;
 }
 
 option {

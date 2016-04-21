@@ -259,10 +259,12 @@ function choropleth(props, colorScale){
          var infoWidth = window.innerWidth* 0.4,
         infoHeight = 400;
         var infoBox = d3.select("body")
-        .append("svg")
+        .append("text")
         .attr("width", infoWidth)
         .attr("height", infoHeight)
         .attr("class", "infoBox");
+        
+        
     }
     //function to create coordinated bar chart
     function setChart(csvData, colorScale){
